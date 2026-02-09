@@ -63,6 +63,22 @@ def evaluate(formula: Formula, model: Model) -> bool:
     """
     assert is_model(model)
     assert formula.variables().issubset(variables(model))
+    if is_constant(formula.root):
+        return formula.root == 'T'
+    if is_variable(formula.root):
+        return bool(model[formula.root])
+    if is_unary(formula.root):
+        return not evaluate(formula.first, model)
+
+    l_val = evaluate(formula.first, model)
+    r_val = evaluate(formula.second, model)
+
+    if formula.root == '&':
+        return l_val and r_val
+    if formula.root == '|':
+        return l_val or r_val
+    assert formula.root == '->'
+    return (not l_val) or r_val
     # Task 2.1
 
 def all_models(variables: Sequence[str]) -> Iterable[Model]:
