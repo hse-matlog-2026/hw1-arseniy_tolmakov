@@ -251,7 +251,19 @@ def synthesize(variables: Sequence[str], values: Iterable[bool]) -> Formula:
         True
         False
     """
-    assert len(variables) > 0
+    for v in variables:
+        assert is_variable(v)
+    vals = list(values)
+    models = list(all_models(list(variables)))
+    assert len(vals) == len(models)
+    terms = [_synthesize_for_model(m) for m, val in zip(models, vals) if val]
+    if not terms:
+        p = variables[0]
+        return Formula('&', Formula(p), Formula('~', Formula(p)))
+    dnf = terms[0]
+    for c in terms[1:]:
+        dnf = Formula('|', dnf, c)
+    return dnf
     # Task 2.7
 
 def _synthesize_for_all_except_model(model: Model) -> Formula:
