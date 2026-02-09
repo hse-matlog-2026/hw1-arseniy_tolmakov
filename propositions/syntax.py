@@ -193,6 +193,55 @@ class Formula:
             should be of ``None`` and an error message, where the error message
             is a string with some human-readable content.
         """
+        if string == '':
+            return None, ''
+        ch = string[0]
+        if is_constant(ch):
+            return Formula(ch), string[1:]
+        if 'p' <= ch <= 'z':
+            i = 1
+            while i < len(string) and string[i].isdecimal():
+                i += 1
+            name = string[:i]
+            if is_variable(name):
+                return Formula(name), string[i:]
+            return None, ''
+        if is_unary(ch):
+            parsed = Formula._parse_prefix(string[1:])
+            if parsed is None:
+                return None, ''
+            sub, rest = parsed
+            if sub is None:
+                return None, rest
+            return Formula('~', sub), rest
+        if ch == '(':
+            parsed_left = Formula._parse_prefix(string[1:])
+            if parsed_left is None:
+                return None, ''
+            left, rest = parsed_left
+            if left is None:
+                return None, rest
+            if rest == '':
+                return None, ''
+            if rest.startswith('->'):
+                op = '->'
+                rest_after_op = rest[2:]
+            else:
+                op = rest[0]
+                rest_after_op = rest[1:]
+            if not is_binary(op):
+                return None, ''
+            parsed_right = Formula._parse_prefix(rest_after_op)
+            if parsed_right is None:
+                return None, ''
+            right, rest2 = parsed_right
+            if right is None:
+                return None, rest2
+            if rest2 == '' or rest2[0] != ')':
+                return None, ''
+            return Formula(op, left, right), rest2[1:]
+
+        return None, ''
         # Task 1.4
 
     @staticmethod
@@ -206,43 +255,8 @@ class Formula:
             ``True`` if the given string is a valid standard string
             representation of a formula, ``False`` otherwise.
         """
-        s = string
-        n = len(s)
-        def parse_from(i: int) -> Optional[int]:
-            if i >= n:
-                return None
-            if is_constant(s[i]):
-                return i + 1
-            if 'p' <= s[i] <= 'z':
-                j = i + 1
-                while j < n and s[j].isdecimal():
-                    j += 1
-                if is_variable(s[i:j]):
-                    return j
-                return None
-            if s[i] == '~':
-                return parse_from(i + 1)
-            if s[i] == '(':
-                j = parse_from(i + 1)
-                if j is None or j >= n:
-                    return None
-                if s.startswith('->', j):
-                    op = '->'
-                    k = j + 2
-                else:
-                    op = s[j]
-                    k = j + 1
-                if not is_binary(op):
-                    return None
-                j2 = parse_from(k)
-                if j2 is None:
-                    return None
-                if j2 < n and s[j2] == ')':
-                    return j2 + 1
-                return None
-            return None
-        end = parse_from(0)
-        return end == n
+        formula, rest = Formula._parse_prefix(string)
+        return formula is not None and rest == ''
         # Task 1.5
         
     @staticmethod
@@ -255,6 +269,9 @@ class Formula:
         Returns:
             A formula whose standard string representation is the given string.
         """
+        assert Formula.is_formula(string)
+        formula, rest = Formula._parse_prefix(string)
+        return formula
         # Task 1.6
 
     def polish(self) -> str:
