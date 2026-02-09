@@ -206,6 +206,8 @@ class Formula:
             ``True`` if the given string is a valid standard string
             representation of a formula, ``False`` otherwise.
         """
+        parsed, rest = Formula._parse_prefix(string)
+        return parsed is not None and rest == ''
         # Task 1.5
         
     @staticmethod
