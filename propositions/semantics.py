@@ -126,6 +126,8 @@ def truth_values(formula: Formula, models: Iterable[Model]) -> Iterable[bool]:
         >>> list(truth_values(Formula.parse('~(p&q76)'), all_models(['p', 'q76'])))
         [True, True, True, False]
     """
+    for model in models:
+        yield evaluate(formula, model)
     # Task 2.3
 
 def print_truth_table(formula: Formula) -> None:
