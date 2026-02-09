@@ -220,6 +220,13 @@ def _synthesize_for_model(model: Model) -> Formula:
     """
     assert is_model(model)
     assert len(model.keys()) > 0
+    vars = sorted(model.keys())
+    def lit(v: str) -> Formula:
+        return Formula(v) if model[v] else Formula('~', Formula(v))
+    ans = lit(vars[0])
+    for v in vars[1:]:
+        ans = Formula('&', ans, lit(v))
+    return ans
     # Task 2.6
 
 def synthesize(variables: Sequence[str], values: Iterable[bool]) -> Formula:
