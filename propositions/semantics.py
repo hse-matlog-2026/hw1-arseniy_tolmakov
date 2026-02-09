@@ -146,6 +146,16 @@ def print_truth_table(formula: Formula) -> None:
         | T | F   | T        |
         | T | T   | F        |
     """
+    vars = sorted(formula.variables())
+    fstr = str(formula)
+    print('| ' + ' | '.join(vars + [fstr]) + ' |')
+    print('|' + '|'.join(['---'] * len(vars) + ['-' * (len(fstr) + 2)]) + '|')
+    pad = ' ' * (len(fstr) - 1)
+    for m in all_models(vars):
+        row = [('T' if m[v] else 'F') for v in vars]
+        val = 'T' if evaluate(formula, m) else 'F'
+        row.append(val + pad)
+        print('| ' + ' | '.join(row) + ' |')
     # Task 2.4
 
 def is_tautology(formula: Formula) -> bool:
