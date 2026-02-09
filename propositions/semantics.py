@@ -167,6 +167,11 @@ def is_tautology(formula: Formula) -> bool:
     Returns:
         ``True`` if the given formula is a tautology, ``False`` otherwise.
     """
+    vars = sorted(formula.variables())
+    for model in all_models(vars):
+        if not evaluate(formula, model):
+            return False
+    return True
     # Task 2.5a
 
 def is_contradiction(formula: Formula) -> bool:
@@ -178,6 +183,11 @@ def is_contradiction(formula: Formula) -> bool:
     Returns:
         ``True`` if the given formula is a contradiction, ``False`` otherwise.
     """
+    vars = sorted(formula.variables())
+    for model in all_models(vars):
+        if evaluate(formula, model):
+            return False
+    return True
     # Task 2.5b
 
 def is_satisfiable(formula: Formula) -> bool:
@@ -189,6 +199,11 @@ def is_satisfiable(formula: Formula) -> bool:
     Returns:
         ``True`` if the given formula is satisfiable, ``False`` otherwise.
     """
+    vars = sorted(formula.variables())
+    for model in all_models(vars):
+        if evaluate(formula, model):
+            return True
+    return False
     # Task 2.5c
 
 def _synthesize_for_model(model: Model) -> Formula:
