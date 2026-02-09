@@ -297,6 +297,33 @@ class Formula:
         Returns:
             A formula whose polish notation representation is the given string.
         """
+        s = string
+        n = len(s)
+        def parse_from(i: int) -> Tuple[Formula, int]:
+            if i >= n:
+                raise ValueError()
+            ch = s[i]
+            if is_constant(ch):
+                return Formula(ch), i + 1
+            if 'p' <= ch <= 'z':
+                j = i + 1
+                while j < n and s[j].isdecimal():
+                    j += 1
+                name = s[i:j]
+                if not is_variable(name):
+                    raise ValueError()
+                return Formula(name), j
+            if is_unary(ch):
+                sub, j = parse_from(i + 1)
+                return Formula('~', sub), j
+            if is_binary(ch):
+                left, j1 = parse_from(i + 1)
+                right, j2 = parse_from(j1)
+                return Formula(ch, left, right), j2
+            raise ValueError()
+        formula, end = parse_from(0)
+        assert end == n
+        return formula
         # Optional Task 1.8
 
     def substitute_variables(self, substitution_map: Mapping[str, Formula]) -> \
