@@ -101,6 +101,13 @@ def all_models(variables: Sequence[str]) -> Iterable[Model]:
     """
     for v in variables:
         assert is_variable(v)
+    n = len(variables)
+    for i in range(2 ** n):
+        model = {}
+        for j, v in enumerate(variables):
+            bit = (i >> (n - 1 - j)) & 1
+            model[v] = bool(bit)
+        yield model
     # Task 2.2
 
 def truth_values(formula: Formula, models: Iterable[Model]) -> Iterable[bool]:
